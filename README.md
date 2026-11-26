@@ -6,6 +6,41 @@ The demo provides a single sign-in experience for two sample applications — **
 
 > **Project status:** Local proof of concept (PoC). This project uses dummy product data and SQLite. It is not connected to any production database or business application.
 
+## Run the app
+
+Use two terminals. Start the backend first and leave it running.
+
+**Backend** (from the project folder):
+
+```powershell
+cd C:\Users\USER\OneDrive\Desktop\Wso2
+backend\.venv\Scripts\python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+The API listens at http://127.0.0.1:8000.
+
+**Frontend** (second terminal):
+
+```powershell
+cd C:\Users\USER\OneDrive\Desktop\Wso2\frontend
+npm run dev
+```
+
+Open http://localhost:5173. Do not use port 8000 in the browser. Vite proxies `/api` to the backend so the session cookie stays on one origin.
+
+The first time you set the machine up, create the virtual environment, install packages, and copy `.env.example` to `.env`. Those steps are in [Getting Started](#getting-started). A local `.env` with no Asgardeo client id is enough to run in mock mode. Asgardeo values are only needed for a real login.
+
+Sign in with `DemoPass123!`:
+
+| Account | Email | FMS | POS |
+|---|---|---|---|
+| Customer A | customer.a@demo.local | Allowed | Denied |
+| Customer B | customer.b@demo.local | Allowed | Allowed |
+| Customer C | customer.c@demo.local | Denied | Allowed |
+| Portal Admin | admin@demo.local | Allowed | Allowed |
+
+The sign-in page is only an email and password form. It does not list these accounts, show the password, show a mock-mode banner, or link to the security report. After sign-in, the header still has the security report, and the portal shows a mock-mode notice while Asgardeo is not configured.
+
 ## Key Features
 
 - **Centralized Authentication:** One login experience for FMS and POS using a single OIDC client.
@@ -196,7 +231,7 @@ Mock mode allows developers to test the application without configuring an Asgar
 
 - Uses local dummy accounts.
 - Validates a local demo password.
-- Displays a MOCK MODE indicator.
+- Shows a mock-mode notice on the portal after sign-in. The sign-in form itself does not show that notice.
 - Does not perform real Asgardeo authentication.
 
 **Important:** Successful mock authentication does not demonstrate real SSO, email verification, email OTP, or TOTP.
@@ -352,7 +387,7 @@ The script generates:
 backend/security-report.json
 ```
 
-The portal's **Security Report** page displays the generated results.
+After sign-in, open **Security report** in the header. That page displays the generated results. The sign-in page does not link to it.
 
 ### Important Testing Limitations
 
