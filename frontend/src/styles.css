@@ -1,0 +1,198 @@
+:root {
+  color: #14202b;
+  background: #e7eef1;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  line-height: 1.45;
+}
+
+* { box-sizing: border-box; }
+
+body { margin: 0; }
+
+a { color: #0d5c4c; }
+
+button, .button-link, .ghost {
+  font: inherit;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+button, .button-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  background: #0f6e56;
+  color: white;
+}
+
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.ghost {
+  background: white;
+  color: #14324a;
+  border: 1px solid #c5d2d8;
+}
+
+.page { min-height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #14324a;
+  color: white;
+}
+
+.topbar a { color: white; text-decoration: none; }
+
+.brand-lockup { display: flex; flex-direction: column; min-width: 140px; }
+
+.brand {
+  margin: 0;
+  font-weight: 700;
+}
+
+.brand-sub { font-size: 0.85rem; opacity: 0.8; }
+
+.topbar nav, .who { display: flex; gap: 16px; align-items: center; }
+
+.who-name { opacity: 0.85; }
+
+.content { width: min(1080px, calc(100% - 32px)); margin: 24px auto; flex: 1; }
+
+footer {
+  padding: 16px 24px 28px;
+  color: #5c6b76;
+  text-align: center;
+}
+
+h1 { margin: 0 0 8px; font-size: 1.8rem; }
+
+h2 { margin: 0; font-size: 1.15rem; }
+
+.lede { margin: 0; color: #3e4c57; }
+
+.page-head { margin-bottom: 18px; }
+
+.banner {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+}
+
+.banner.warn { background: #fff4d8; color: #6d4a00; }
+.banner.ok { background: #e5f6f0; color: #0d5342; }
+.banner.bad { background: #fdecee; color: #8d1d2c; }
+
+.disclaimer {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #d5dee3;
+  border-radius: 10px;
+}
+
+.hint { color: #5c6b76; font-size: 0.92rem; }
+
+.center { padding: 48px 16px; text-align: center; }
+
+.login-wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+}
+
+.login-card {
+  width: min(560px, 100%);
+  background: white;
+  border: 1px solid #d5dee3;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(20, 50, 74, 0.06);
+}
+
+.login-card h1 { margin-top: 4px; }
+
+form, .stack { display: grid; gap: 8px; }
+
+label { font-size: 0.92rem; font-weight: 600; margin-top: 8px; }
+
+input {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #c5d2d8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.profile, .card {
+  background: white;
+  border: 1px solid #d5dee3;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.profile {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 12px 0; }
+dt { color: #5c6b76; font-size: 0.82rem; }
+dd { margin: 0; }
+
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.card-top, .card { display: grid; gap: 10px; }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #eef2f4;
+}
+
+.pill.ok, .pill.pass { background: #e5f6f0; color: #0d5342; }
+.pill.bad, .pill.fail { background: #fdecee; color: #8d1d2c; }
+.pill.not_tested, .pill.not { background: #fff4d8; color: #6d4a00; }
+
+.table-wrap { overflow-x: auto; background: white; border: 1px solid #d5dee3; border-radius: 14px; }
+
+table { width: 100%; border-collapse: collapse; }
+
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e4ebef; vertical-align: top; }
+
+th { font-size: 0.82rem; color: #5c6b76; }
+
+.evidence { min-width: 280px; }
+
+.back { margin-top: 0; }
+
+code { font-family: Consolas, monospace; font-size: 0.92em; }
+
+:focus-visible { outline: 2px solid #0f6e56; outline-offset: 2px; }
+
+@media (max-width: 800px) {
+  .topbar, .profile, .cards, dl { display: grid; }
+  .topbar { justify-content: stretch; }
+  .cards, dl { grid-template-columns: 1fr; }
+  .profile { align-items: start; }
+}
