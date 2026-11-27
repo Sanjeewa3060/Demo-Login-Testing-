@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 
 const LOGIN_ERRORS = {
-  mock_mode: "Asgardeo sign-in is off while mock mode is enabled.",
-  not_configured: "Asgardeo is not configured. Add the organization and client id to the environment file.",
+  mock_mode: "Passkey sign-in needs the Asgardeo organization name. The local sign-in is still available until that is set.",
+  not_configured: "Asgardeo is not configured. Add the organization name next to the client id.",
   asgardeo_denied: "Asgardeo did not complete sign-in.",
   invalid_callback: "The sign-in callback was rejected.",
   token_exchange_failed: "Asgardeo did not issue a token. Check the redirect URL and client settings.",
@@ -58,13 +58,17 @@ export default function Login() {
     <main className="login-wrap">
       <section className="login-card">
         <h1>Identity Portal</h1>
-        <p className="lede">One sign-in for the dummy FMS and POS applications.</p>
+        <p className="lede">Sign-in is handled by WSO2 Asgardeo.</p>
 
         {config?.server_mode === "asgardeo" && (
           <p className="banner ok" role="status">
-            Sign-in opens WSO2 Asgardeo. Email verification, email OTP, and TOTP appear
-            there only when those steps are enabled on the organization. This screen
-            cannot mark those steps successful by itself.
+            Email, password, passkey, email OTP, and TOTP are Asgardeo login steps.
+            This application stores product access only.
+          </p>
+        )}
+        {config?.client_id_set && !config?.organization_set && (
+          <p className="banner warn" role="status">
+            The client id is saved. Passkey sign-in starts after the Asgardeo organization name is added.
           </p>
         )}
         {!config && !configError && <p>Loading sign-in…</p>}
@@ -100,7 +104,15 @@ export default function Login() {
         {config && !config.mock_login_enabled && (
           <div className="stack">
             {config.discovery_error && <p className="banner bad">{config.discovery_error}</p>}
-            <a className="button-link" href="/api/auth/login">Sign in with Asgardeo</a>
+            <a className="button-link" href="/api/auth/login">Sign in with WSO2 Asgardeo</a>
+            {config.password_recovery_url && (
+              <a href={config.password_recovery_url}>Reset password with Asgardeo</a>
+            )}
+            {config.identity_admin === "not_configured" && (
+              <p className="hint">
+                Creating customers in WSO2 is not configured until the management application secret is set.
+              </p>
+            )}
             {config.issuer && <p className="hint">Issuer: {config.issuer}</p>}
           </div>
         )}

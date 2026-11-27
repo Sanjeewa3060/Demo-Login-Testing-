@@ -1,5 +1,9 @@
 # WSO2 Asgardeo SSO Demo
 
+The WSO2 product demo is in `apps/product-1`. Open http://localhost:5173 for Product 1 and http://localhost:5173/product-2 for Product 2. Both use the same Asgardeo client. Details are in [SSO-POC.md](SSO-POC.md).
+
+The sections below describe the earlier portal in `frontend/` and `backend/`, which remains in the repository.
+
 A proof-of-concept application demonstrating centralized authentication and product-level access management using **WSO2 Asgardeo**.
 
 The demo provides a single sign-in experience for two sample applications — **Finance Management System (FMS)** and **Point of Sale (POS)** — with an administrative portal to manage customer accounts and product permissions.
@@ -254,8 +258,10 @@ To enable real authentication:
 **Authorized Redirect URL**
 
 ```text
-http://localhost:5173/api/auth/callback
+http://localhost:5173
 ```
+
+This Asgardeo application allows that exact address. The site receives the code there and passes it to the API.
 
 **Post Logout Redirect URL**
 
@@ -286,17 +292,23 @@ Use the client secret only for a confidential application that requires it.
 
 **Security:** Never expose client secrets or other credentials in frontend code or commit them to GitHub.
 
-### Step 5: Enable Email Verification and MFA
+### Step 5: Management application for user administration
 
-Configure the required authentication steps in the Asgardeo login flow.
+Sign-in uses the public OIDC application. Creating a customer, disabling an account, revoking Asgardeo sessions, and sending a password reset use SCIM and need a separate confidential application.
 
-Possible authentication steps include:
+1. Create a confidential application in the same organization.
+2. Authorize these scopes: `internal_user_mgt_list`, `internal_user_mgt_view`, `internal_user_mgt_create`, `internal_user_mgt_update`, `internal_session_delete`.
+3. Put its client id and secret in `ASGARDEO_MANAGEMENT_CLIENT_ID` and `ASGARDEO_MANAGEMENT_CLIENT_SECRET`.
 
-- Email verification
-- Email OTP
-- TOTP-based authentication
+Until those values are set, customer creation is reported as **not configured**. The API does not invent a user and does not store a password.
 
-These authentication challenges are handled by Asgardeo, not recreated by this demo.
+KAIONEX stores only product entitlements (FMS, POS, E-Commerce, EMS). One email maps to one Asgardeo user. Buying another product updates that entitlement and does not create a second identity.
+
+### Step 6: Enable the Asgardeo login methods
+
+On the sign-in application, enable the methods WSO2 should offer: email and password, passkey, email OTP, and TOTP. This demo does not implement those checks itself. Password reset opens the Asgardeo account recovery endpoint.
+
+Account disabling must be enabled in the organization before an administrator can deactivate a customer through the SCIM `accountDisabled` attribute.
 
 After successful authentication, the portal displays the available `email_verified` and `amr` claims returned by Asgardeo. Missing claims are reported as not present rather than assumed to have passed.
 

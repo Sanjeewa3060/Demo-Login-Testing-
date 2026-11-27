@@ -5,6 +5,8 @@ import { api } from "../api";
 const NAMES = {
   fms: "FMS",
   pos: "POS",
+  ecommerce: "E-Commerce",
+  ems: "EMS",
 };
 
 export default function Product({ kind }) {

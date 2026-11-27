@@ -4,20 +4,10 @@ import { formatWhen } from "../components";
 import { useSession } from "../session";
 
 const APPS = [
-  {
-    kind: "fms",
-    name: "FMS",
-    text: "Dummy facilities work orders.",
-    href: "/fms",
-    flag: "fms_access",
-  },
-  {
-    kind: "pos",
-    name: "POS",
-    text: "Dummy point-of-sale receipts.",
-    href: "/pos",
-    flag: "pos_access",
-  },
+  { kind: "fms", name: "FMS", text: "Dummy facilities work orders.", href: "/fms", flag: "fms_access" },
+  { kind: "pos", name: "POS", text: "Dummy point-of-sale receipts.", href: "/pos", flag: "pos_access" },
+  { kind: "ecommerce", name: "E-Commerce", text: "Dummy online orders.", href: "/ecommerce", flag: "ecommerce_access" },
+  { kind: "ems", name: "EMS", text: "Dummy employee records.", href: "/ems", flag: "ems_access" },
 ];
 
 export default function Portal() {
@@ -32,7 +22,13 @@ export default function Portal() {
     <>
       <div className="page-head">
         <h1>Identity Portal</h1>
-        <p className="lede">Choose an application. The API allows or refuses it from the account record.</p>
+        <p className="lede">
+          Your login can open only what you paid for
+          {APPS.some((app) => me[app.flag])
+            ? `: ${APPS.filter((app) => me[app.flag]).map((app) => app.name).join(", ")}.`
+            : "."}
+          {" "}The API refuses anything else.
+        </p>
       </div>
 
       <section className="profile">

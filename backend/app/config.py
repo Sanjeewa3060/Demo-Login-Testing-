@@ -35,6 +35,15 @@ class Settings:
         self.organization = organization
         self.base_url = base
         self.asgardeo_configured = bool(self.client_id and self.base_url)
+        self.management_client_id = (
+            os.getenv("ASGARDEO_MANAGEMENT_CLIENT_ID", "").strip() or self.client_id
+        )
+        self.management_client_secret = (
+            os.getenv("ASGARDEO_MANAGEMENT_CLIENT_SECRET", "").strip() or self.client_secret
+        )
+        self.identity_admin_configured = bool(
+            self.base_url and self.management_client_id and self.management_client_secret
+        )
 
         mode = os.getenv("MOCK_MODE", "auto").strip().lower()
         if mode not in {"auto", "true", "false"}:

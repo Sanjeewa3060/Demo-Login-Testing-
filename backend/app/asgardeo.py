@@ -21,6 +21,9 @@ from .db import pop_oauth_state, save_oauth_state, utcnow
 
 logger = logging.getLogger("portal.asgardeo")
 
+PASSKEY_AUTHENTICATOR = "FIDOAuthenticator"
+EMAIL_OTP_AUTHENTICATOR = "email-otp-authenticator"
+
 _discovery: dict | None = None
 _jwks: PyJWKClient | None = None
 
@@ -69,29 +72,56 @@ def _pkce_challenge(verifier: str) -> str:
     return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
 
 
-def begin_authorization() -> tuple[str, str]:
-    """Return the Asgardeo redirect URL and the state value stored for this browser."""
+def begin_authorization(
+    method: str = "passkey",
+    user_id: int | None = None,
+    payload: str | None = None,
+    login_hint: str | None = None,
+) -> tuple[str, str]:
+    """Return the Asgardeo redirect URL and the state value stored for this browser.
+
+    method "passkey" is the front sign-in. method "email_otp" is the admin step-up
+    that must succeed before a login is created or changed.
+    """
     discovery = get_discovery()
     state = secrets.token_urlsafe(24)
     nonce = secrets.token_urlsafe(24)
     verifier = secrets.token_urlsafe(64)
-    save_oauth_state(state, verifier, nonce, utcnow() + timedelta(minutes=10))
-    query = urlencode(
-        {
-            "response_type": "code",
-            "client_id": settings.client_id,
-            "redirect_uri": settings.redirect_uri,
-            "scope": "openid profile email",
-            "state": state,
-            "nonce": nonce,
-            "code_challenge": _pkce_challenge(verifier),
-            "code_challenge_method": "S256",
-        }
+    purpose = "admin_change" if method in {"email_otp", "passkey_confirm"} else "login"
+    save_oauth_state(
+        state,
+        verifier,
+        nonce,
+        utcnow() + timedelta(minutes=10),
+        purpose=purpose,
+        payload=payload,
+        user_id=user_id,
     )
+    query_params = {
+        "response_type": "code",
+        "client_id": settings.client_id,
+        "redirect_uri": settings.redirect_uri,
+        "scope": "openid profile email",
+        "state": state,
+        "nonce": nonce,
+        "code_challenge": _pkce_challenge(verifier),
+        "code_challenge_method": "S256",
+    }
+    if method in {"passkey", "passkey_confirm"}:
+        query_params["idp"] = "LOCAL"
+        query_params["authenticator"] = PASSKEY_AUTHENTICATOR
+    if method == "email_otp":
+        query_params["idp"] = "LOCAL"
+        query_params["authenticator"] = EMAIL_OTP_AUTHENTICATOR
+    if method in {"email_otp", "passkey_confirm"}:
+        query_params["prompt"] = "login"
+        if login_hint:
+            query_params["login_hint"] = login_hint
+    query = urlencode(query_params)
     return f"{discovery['authorization_endpoint']}?{query}", state
 
 
-def take_state(state: str) -> tuple[str, str] | None:
+def take_state(state: str) -> dict | None:
     row = pop_oauth_state(state)
     if row is None:
         return None
@@ -99,7 +129,7 @@ def take_state(state: str) -> tuple[str, str] | None:
 
     if parse_iso(row["expires_at"]) <= utcnow():
         return None
-    return row["code_verifier"], row["nonce"]
+    return row
 
 
 def exchange_code(code: str, code_verifier: str) -> dict:
@@ -165,6 +195,32 @@ def email_from_claims(claims: dict) -> str | None:
     if "@" not in email:
         return None
     return email
+
+
+def is_passkey(claims: dict) -> bool:
+    """True when the ID token says this sign-in used a passkey."""
+    values = amr_from_claims(claims)
+    for key in ("authenticator", "authenticators"):
+        extra = claims.get(key)
+        if isinstance(extra, str):
+            values.append(extra)
+        elif isinstance(extra, list):
+            values.extend(str(item) for item in extra)
+    folded = " ".join(values).lower().replace("_", "").replace("-", "")
+    return "fido" in folded or "passkey" in folded or "webauthn" in folded
+
+
+def is_email_otp(claims: dict) -> bool:
+    """True only when the ID token says this login used email OTP."""
+    values = amr_from_claims(claims)
+    for key in ("authenticator", "authenticators"):
+        extra = claims.get(key)
+        if isinstance(extra, str):
+            values.append(extra)
+        elif isinstance(extra, list):
+            values.extend(str(item) for item in extra)
+    folded = " ".join(values).lower().replace("_", "").replace("-", "")
+    return "emailotp" in folded
 
 
 def amr_from_claims(claims: dict) -> list[str]:

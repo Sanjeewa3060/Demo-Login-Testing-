@@ -1,5 +1,7 @@
 node_modules/
 frontend/dist/
+apps/product-1/dist/
+apps/product-2/dist/
 backend/.venv/
 backend/__pycache__/
 backend/app/__pycache__/
